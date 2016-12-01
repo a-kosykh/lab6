@@ -1,84 +1,133 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <conio.h>
 #include <iostream>
 using namespace std;
-struct List {
-    int a;
-    List* next;
+struct Guitar
+{
+	char model[64];
+	unsigned int year;
+	char country[32];
 };
 
-// Функция добавления элемента в начало списка
-void addFirst(List *& pF, // Указатель на начало списка
-              List* p) // Указатель на добавляемый элемент
+struct List
 {
-    p->next = pF;
-    pF = p;
+	Guitar Guitar;
+	List *pNext;
+};
+
+
+void addFirst(List *& pF, List* p)
+{
+	p->pNext = pF;
+	pF = p;
 }
-// Удаление элемента из начала списка
-List * delFirst(List *&pF) // Функция возвращает указатель на удаляемый элемент
+
+List * delFirst(List *&pF)
 {
-    if (pF == 0) return 0;
-    List *p = pF;
-    pF = pF->next;
-    return p;
+	if (pF == 0) return 0;
+	List *p = pF;
+	pF = pF->pNext;
+	return p;
 
 }
-// Добавление элемента перед заданным
+
 bool add(List *&pF, List * pZad, List *p)
 {
-    // Функция возвращает true при нормальном завершении и false в случае ошибки
-    if (pZad == pF) // Элемент будет первым
-    {
-        p->next = pF;
-        pF = p;
-        return true;
-    }
 
-    List *pPred = pF; // Указатель на предыдущий элемент перед pZad
-    while (pPred->next != pZad && pPred->next)
-        pPred = pPred->next;
-    if (pPred->next == 0) return false; // Элемента pZad нет в списке
-    p->next = pZad;
-    pPred->next = p;
-    return true;
-}
-// Удаление любого элемента p из списка
-List * del(List*& pF, List *p) // Функция возвращает указатель на удаленный элемент
-{
-    if (pF == 0) return 0;
-    if (pF == p) // Удаляем первый элемент
-    {
-        pF = pF->next;
-        return p;
-    }
-    else
-    {
-        List *pPred = pF; // Указатель на предыдущий элемент перед p
-        while (pPred->next != p && pPred->next)
-            pPred = pPred->next;
-        if (pPred->next == 0) return 0; // Элемента p нет в списке
-        pPred->next = p->next;
-        return p;
-    }
-    while (delFirst(pF)); // Очистка списка
+	if (pZad == pF)
+	{
+		p->pNext = pF;
+		pF = p;
+		return true;
+	}
+
+	List *pPred = pF;
+	while (pPred->pNext != pZad && pPred->pNext)
+		pPred = pPred->pNext;
+	if (pPred->pNext == 0) return false;
+	p->pNext = pZad;
+	pPred->pNext = p;
+	return true;
 }
 
-int main()
+List * del(List*& pF, List *p)
 {
-    List *pF = 0; // Список пуст
-    List *p;
-    // Ввод списка
-    int n=0;
-    char Ch; // Переменная для ввода условия продолжения ввода
-    do
-    {
-        p = (List *)malloc(sizeof(List)); // Выделяем память под элемент
-        cin >> p -> a;
-        addFirst (pF,p);
-        n++;
-        cout << "continiu" << endl;
-        cin >> Ch;
-    } while (Ch == 'Y' || Ch == 'y');
+	if (pF == 0) return 0;
+	if (pF == p)
+	{
+		pF = pF->pNext;
+		return p;
+	}
+	else
+	{
+		List *pPred = pF;
+		while (pPred->pNext != p && pPred->pNext)
+			pPred = pPred->pNext;
+		if (pPred->pNext == 0) return 0;
+		pPred->pNext = p->pNext;
+		return p;
+	}
+	while (delFirst(pF));
+}
 
-    return 0;
+int main(int argc, char* argv[])
+{
+	List *pF = 0;
+	List *p;
+
+	char Ex;
+	do
+	{
+		p = (List *)malloc(sizeof(List));
+		
+		cout << endl;
+		cout << "Model: ";
+		cin.get();
+		fflush(stdin);
+		gets_s(p->Guitar.model, 63);
+
+		cout << "Country: ";
+		fflush(stdin);
+		gets_s(p->Guitar.country, 31);
+		
+		cout << "Year: "; 
+		fflush(stdin);
+		cin >> p->Guitar.year;
+
+		addFirst(pF, p);
+		printf("For continue press Y or y else any key! ");
+		Ex = _getche();
+		cin.clear();
+		cout << endl;
+	
+	} while (Ex == 'Y' || Ex == 'y');
+	cout << endl;
+
+	for (List *pi = pF; pi; pi = pi->pNext)
+		cout << pi->Guitar.model << " " << pi->Guitar.country << " " << pi->Guitar.year << endl;
+
+	for (List *pi = pF; pi->pNext;)
+	{
+
+		double min = pi->Guitar.year;
+		List *pmin = pi;
+		for (List *pj = pi->pNext; pj; pj = pj->pNext)
+			if (pj->Guitar.year<min)
+			{
+				min = pj->Guitar.year;
+				pmin = pj;
+			}
+		if (pi != pmin)
+		{
+			del(pF, pmin);
+			add(pF, pi, pmin);
+		}
+		else pi = pi->pNext;
+	}
+
+	cout << endl;
+	cout << "Sorted: " << endl;
+	for (List *pi = pF; pi; pi = pi->pNext)
+		cout << pi->Guitar.model << " " << pi->Guitar.country << " " << pi->Guitar.year << endl;
+	system("pause");
+	return 0;
 }
